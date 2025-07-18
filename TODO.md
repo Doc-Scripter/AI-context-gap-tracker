@@ -64,3 +64,48 @@ This document outlines potential pitfalls in the AI Context Gap Tracker project,
     *   **Modular Design:** Continue with the modular design and ensure clear interfaces between modules.
     *   **Unit and Integration Tests:** Write comprehensive unit tests and integration tests. Ensure the existing `scripts/test_system.sh` is thorough.
     *   **Documentation:** Maintain up-to-date documentation for the API (`docs/API.md`) and deployment (`docs/DEPLOYMENT.md`).
+
+## Integration with Claude Desktop (MCP Server Component)
+
+To integrate the AI Context Gap Tracker with Claude Desktop, an MCP (Model Context Protocol) server component needs to be developed, preferably in Python, to expose the tracker's functionalities as tools.
+
+### 1. Develop a Python MCP Server
+*   **Task:** Create a new Python application that acts as an MCP server. This server will expose the core functionalities of the AI Context Gap Tracker (prompt rewriting and response auditing) as MCP tools.
+*   **Details:**
+    *   Utilize the `mcp` Python SDK (e.g., `FastMCP`) to define and register tools.
+    *   The MCP server will communicate with the existing Go-based AI Context Gap Tracker services (e.g., `promptrewriter`, `responseauditor`) via their internal APIs (e.g., HTTP/gRPC).
+    *   Example tools to expose:
+        *   `rewrite_prompt(original_prompt: str) -> str`: Calls the Go `promptrewriter` service.
+        *   `audit_response(original_response: str, context: str) -> str`: Calls the Go `responseauditor` service.
+
+### 2. Configure Claude Desktop
+*   **Task:** Instruct Claude Desktop to recognize and use the newly created Python MCP server.
+*   **Details:**
+    *   Locate or create the `claude_desktop_config.json` file:
+        *   macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        *   Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+    *   Add a new entry under `mcpServers` pointing to your Python MCP server. This entry will specify the command to run the server and any necessary environment variables (e.g., the endpoint of your Go tracker).
+    *   **Example Configuration Snippet:**
+        ```json
+        {
+          "mcpServers": {
+            "context-gap-tracker": {
+              "command": "python",
+              "args": [
+                "/path/to/your/mcp_server/main.py" // Replace with actual path
+              ],
+              "env": {
+                "TRACKER_API_ENDPOINT": "http://localhost:8080" // Adjust if your Go server runs on a different port
+              }
+            }
+          }
+        }
+        ```
+
+### 3. Restart Claude Desktop
+*   **Task:** Ensure Claude Desktop reloads its configuration and initializes the new MCP server.
+*   **Details:** After modifying `claude_desktop_config.json`, close and reopen Claude Desktop to apply the changes.
+
+### 4. Test Integration
+*   **Task:** Verify that Claude Desktop can successfully interact with the AI Context Gap Tracker's MCP tools.
+*   **Details:** Experiment with prompts in Claude Desktop that would trigger the `rewrite_prompt` or `audit_response` tools, observing the behavior and checking logs for successful communication.
