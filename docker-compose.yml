@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ai_context_tracker
+      POSTGRES_USER: tracker_user
+      POSTGRES_PASSWORD: tracker_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    networks:
+      - ai-tracker-network
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-tracker-network
+
+  # Go backend service
+  ai-context-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=ai_context_tracker
+      - DB_USER=tracker_user
+      - DB_PASSWORD=tracker_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "8080:8080"
+      - "9090:9090"  # gRPC port
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - ai-tracker-network
+
+  # Python NLP service
+  nlp-service:
+    build:
+      context: ./python-nlp
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    networks:
+      - ai-tracker-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  ai-tracker-network:
+    driver: bridge
