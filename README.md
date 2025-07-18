@@ -132,6 +132,58 @@ Previous name **AIConscience** was considered too abstract or morally framed.
 ## Status
 Initial architectural planning complete. Implementation of Go backend modules and Python clarity checker in progress.
 
+## Getting Started
+
+This project uses Docker and Docker Compose for easy setup and execution across different operating systems (Linux, WSL, Windows).
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+1.  **Git**: For cloning the project repository.
+    *   **Linux/WSL**: `sudo apt update && sudo apt install git` (for Debian/Ubuntu-based systems)
+    *   **Windows**: Download from [git-scm.com](https://git-scm.com/download/win)
+
+2.  **Docker Desktop** (for Windows/macOS) or **Docker Engine & Docker Compose** (for Linux):
+    *   **Windows**: Install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/). This includes Docker Engine and Docker Compose.
+    *   **WSL**: Ensure you have [WSL 2 installed](https://docs.microsoft.com/en-us/windows/wsl/install) and enable WSL 2 integration in Docker Desktop settings (Settings -> Resources -> WSL Integration).
+    *   **Linux**: Follow the official guides to install [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) for your distribution.
+
+### Setup and Run
+
+Follow these simple steps to get the AI Context Gap Tracker running:
+
+1.  **Clone the Repository**:
+    Open your terminal (or Git Bash/PowerShell on Windows) and clone the project to your local machine:
+    ```bash
+    git clone https://github.com/your-repo/AI-context-gap-tracker.git
+    cd AI-context-gap-tracker
+    ```
+    *(Note: Replace the URL with the actual repository URL if it's different.)*
+
+2.  **Configure Environment Variables**:
+    The project uses an `.env.example` file for configuration. Copy this file to `.env` and modify it if you need to customize settings (e.g., API keys for external AI models, database connections).
+    ```bash
+    cp .env.example .env
+    # Open the .env file with a text editor and make any necessary changes.
+    ```
+
+3.  **Build and Run with Docker Compose**:
+    Navigate to the project's root directory in your terminal and run the following command. This will build the necessary Docker images and start all the services (Go backend, Python NLP service, Redis, etc.).
+    ```bash
+    docker-compose up --build
+    ```
+    *   The `--build` flag ensures that all service images are built from scratch, incorporating any recent changes.
+    *   The services will run in the foreground, and you will see their logs in your terminal.
+
+4.  **Verify Services (Optional)**:
+    You can open a new terminal window and run `docker-compose ps` to confirm that all services are running (`Up` status).
+
+5.  **Access the Application**:
+    The main Go server will typically be accessible via `http://localhost:8080` (or another port specified in the `docker-compose.yml` or `.env` file). You can now interact with its API from your client applications or development tools.
+
+That's it! The AI Context Gap Tracker is now running locally, ready to enhance your AI interactions.
+
 ## Contributors
 Lead: Clifford Otieno
 
