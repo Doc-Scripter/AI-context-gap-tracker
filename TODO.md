@@ -78,6 +78,60 @@ To integrate the AI Context Gap Tracker with Claude Desktop, an MCP (Model Conte
         *   `rewrite_prompt(original_prompt: str) -> str`: Calls the Go `promptrewriter` service.
         *   `audit_response(original_response: str, context: str) -> str`: Calls the Go `responseauditor` service.
 
+## Universal MCP Server Implementation
+
+To ensure the AI Context Gap Tracker's MCP server can work with any MCP-compliant host application, not just Claude Desktop, it needs to be designed as a universal and robust implementation.
+
+### 1. Universality of the Model Context Protocol (MCP)
+*   **Concept:** The Model Context Protocol (MCP) is a universal standard designed to allow host applications to interact with external tools and services. An MCP server, once implemented, can theoretically connect to any application that supports the MCP specification.
+*   **Goal:** The aim is to create an MCP server for the AI Context Gap Tracker that is a robust, standard-compliant implementation, decoupled from any host-specific logic. The host application (e.g., Claude Desktop, VS Code extension, custom IDE) will handle its own configuration to connect to this universal MCP server.
+
+### 2. Setting Up and Running the Universal MCP Server
+Running the AI Context Gap Tracker as a universal MCP server involves two main components:
+
+#### a. Running the AI Context Gap Tracker Backend (Go Services)
+*   **Task:** Ensure the core Go services of the AI Context Gap Tracker are running and accessible. These services provide the actual functionalities (e.g., prompt rewriting, response auditing) that the MCP server will expose.
+*   **Details:**
+    *   Navigate to the root directory of the `AI-context-gap-tracker` project.
+    *   Execute the Docker Compose command to build and run all necessary Go services:
+        ```bash
+        docker-compose up --build
+        ```
+    *   Verify that the Go services (e.g., `promptrewriter`, `responseauditor`, `server`) are running and their APIs are accessible (e.g., typically on `http://localhost:8080` or another configured port).
+
+#### b. Running the Python MCP Server
+*   **Task:** The Python application developed as the MCP server needs to be executed and made accessible to host applications.
+*   **Details:**
+    *   **For Development (Direct Execution):**
+        *   Once the Python MCP server application (`main.py` or similar) is developed, it can be run directly from the command line:
+            ```bash
+            python /path/to/your/mcp_server/main.py
+            ```
+        *   Ensure the Python environment has all necessary dependencies installed (e.g., `pip install -r requirements.txt`).
+    *   **For Production (Containerization with Docker Compose):**
+        *   **Dockerfile:** Create a `Dockerfile` for the Python MCP server to containerize it, ensuring all dependencies are bundled.
+        *   **docker-compose.yml Integration:** Add the Python MCP server as a new service in the existing `docker-compose.yml` file. This service should be configured to depend on the Go backend services to ensure they are running before the MCP server starts.
+        *   **Example `docker-compose.yml` Snippet (Conceptual):**
+            ```yaml
+            services:
+              # ... existing Go services ...
+
+              mcp-server:
+                build: ./path/to/your/mcp_server_directory
+                ports:
+                  - "8000:8000" # Or any other port the MCP server listens on
+                environment:
+                  TRACKER_API_ENDPOINT: http://go-backend-service-name:8080 # Link to your Go backend service
+                depends_on:
+                  - go-backend-service-name # Ensure Go services are up
+            ```
+        *   After updating `docker-compose.yml`, run `docker-compose up --build` again to bring up the new MCP server service.
+
+### 3. Host Application Configuration
+*   **Task:** Configure the MCP-compliant host application (e.g., Claude Desktop, VS Code) to connect to the running universal MCP server.
+*   **Details:** The host application will need to be configured with the address and port where the Python MCP server is running (e.g., `http://localhost:8000` if running locally via Docker Compose). This configuration is specific to each host application (e.g., `claude_desktop_config.json` for Claude Desktop, or settings within a VS Code extension).
+
+By following these steps, the AI Context Gap Tracker can function as a truly universal MCP tool, providing its context management and prompt enhancement capabilities to a wide range of AI-powered applications.
 ### 2. Configure Claude Desktop
 *   **Task:** Instruct Claude Desktop to recognize and use the newly created Python MCP server.
 *   **Details:**
