@@ -1,6 +1,6 @@
 # AI Context Gap Tracker - Makefile
 
-.PHONY: help build run test clean docker-build docker-run docker-stop dev-setup
+.PHONY: help build run test clean docker-build docker-run docker-stop dev-setup mcp-test mcp-run mcp-setup
 
 # Default target
 help:
@@ -16,6 +16,11 @@ help:
 	@echo "  dev-setup    - Set up development environment"
 	@echo "  system-test  - Run system integration tests"
 	@echo "  example      - Run example usage"
+	@echo ""
+	@echo "MCP Server Commands:"
+	@echo "  mcp-setup    - Set up MCP server dependencies"
+	@echo "  mcp-test     - Test MCP server integration"
+	@echo "  mcp-run      - Run MCP server with uvx"
 
 # Build Go application
 build:
@@ -138,3 +143,31 @@ health-check:
 	@echo "🏥 Checking service health..."
 	curl -s http://localhost:8080/api/v1/health | jq . || echo "Service not running"
 	curl -s http://localhost:5000/health | jq . || echo "NLP service not running"
+
+# MCP Server setup
+mcp-setup:
+	@echo "🔧 Setting up MCP server dependencies..."
+	pip install httpx mcp
+	@echo "✅ MCP dependencies installed!"
+
+# Test MCP server
+mcp-test:
+	@echo "🧪 Testing MCP server structure..."
+	python3 scripts/test_mcp_structure.py
+	@echo "🧪 Testing MCP server integration..."
+	pip install httpx || echo "Installing httpx..."
+	python3 scripts/test_mcp_server.py
+	@echo "✅ MCP server tests completed!"
+
+# Run MCP server with uvx
+mcp-run:
+	@echo "🚀 Running MCP server with uvx..."
+	uvx --from . ai-context-gap-tracker
+	@echo "✅ MCP server started!"
+
+# Full MCP setup and test
+mcp-full: mcp-setup docker-run mcp-test
+	@echo "🎉 Full MCP setup and testing completed!"
+	@echo "📋 To use with Claude Desktop:"
+	@echo "   1. Configure claude_desktop_config.json (see docs/MCP_SERVER_SETUP.md)"
+	@echo "   2. Run: uvx --from . ai-context-gap-tracker"
