@@ -18,8 +18,6 @@ from mcp.types import (
     Resource,
     Tool,
     TextContent,
-    ImageContent,
-    EmbeddedResource,
     CallToolResult,
     ListResourcesResult,
     ListToolsResult,
@@ -48,122 +46,111 @@ class MCPServer:
         """Register MCP tools that expose tracker functionality"""
         
         @self.server.list_tools()
-        async def list_tools() -> ListToolsResult:
-            return ListToolsResult(
-                tools=[
-                    Tool(
-                        name="rewrite_prompt",
-                        description="Enhance a prompt with context and clarity flags to improve AI accuracy",
-                        inputSchema={
-                            "type": "object",
-                            "properties": {
-                                "prompt": {
-                                    "type": "string",
-                                    "description": "The original prompt to enhance"
-                                },
-                                "session_id": {
-                                    "type": "string",
-                                    "description": "Session ID for context tracking (optional)",
-                                    "default": "mcp-session"
-                                },
-                                "context": {
-                                    "type": "object",
-                                    "description": "Additional context information (optional)",
-                                    "default": {}
-                                }
+        async def list_tools() -> List[Tool]:
+            return [
+                Tool(
+                    name="rewrite_prompt",
+                    description="Enhance a prompt with context and clarity flags to improve AI accuracy",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "prompt": {
+                                "type": "string",
+                                "description": "The original prompt to enhance"
                             },
-                            "required": ["prompt"]
-                        }
-                    ),
-                    Tool(
-                        name="audit_response",
-                        description="Audit an AI response for quality, assumptions, and potential issues",
-                        inputSchema={
-                            "type": "object",
-                            "properties": {
-                                "response": {
-                                    "type": "string",
-                                    "description": "The AI response to audit"
-                                },
-                                "original_prompt": {
-                                    "type": "string",
-                                    "description": "The original prompt that generated the response (optional)"
-                                },
-                                "context": {
-                                    "type": "object",
-                                    "description": "Context information for auditing (optional)",
-                                    "default": {}
-                                }
+                            "session_id": {
+                                "type": "string",
+                                "description": "Session ID for context tracking (optional)"
                             },
-                            "required": ["response"]
-                        }
-                    ),
-                    Tool(
-                        name="track_context",
-                        description="Track conversation context and detect information gaps",
-                        inputSchema={
-                            "type": "object",
-                            "properties": {
-                                "user_input": {
-                                    "type": "string",
-                                    "description": "User input to analyze for context"
-                                },
-                                "session_id": {
-                                    "type": "string",
-                                    "description": "Session ID for context tracking",
-                                    "default": "mcp-session"
-                                },
-                                "turn_number": {
-                                    "type": "integer",
-                                    "description": "Turn number in the conversation",
-                                    "default": 1
-                                }
+                            "context": {
+                                "type": "object",
+                                "description": "Additional context information (optional)"
+                            }
+                        },
+                        "required": ["prompt"]
+                    }
+                ),
+                Tool(
+                    name="audit_response",
+                    description="Audit an AI response for quality, assumptions, and potential issues",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "response": {
+                                "type": "string",
+                                "description": "The AI response to audit"
                             },
-                            "required": ["user_input"]
-                        }
-                    ),
-                    Tool(
-                        name="evaluate_rules",
-                        description="Evaluate logical rules against user input to detect inconsistencies",
-                        inputSchema={
-                            "type": "object",
-                            "properties": {
-                                "user_input": {
-                                    "type": "string",
-                                    "description": "User input to evaluate against rules"
-                                },
-                                "session_id": {
-                                    "type": "string",
-                                    "description": "Session ID for context",
-                                    "default": "mcp-session"
-                                },
-                                "entities": {
-                                    "type": "object",
-                                    "description": "Extracted entities (optional)",
-                                    "default": {}
-                                }
+                            "original_prompt": {
+                                "type": "string",
+                                "description": "The original prompt that generated the response (optional)"
                             },
-                            "required": ["user_input"]
-                        }
-                    ),
-                    Tool(
-                        name="get_session_context",
-                        description="Retrieve stored context for a conversation session",
-                        inputSchema={
-                            "type": "object",
-                            "properties": {
-                                "session_id": {
-                                    "type": "string",
-                                    "description": "Session ID to retrieve context for",
-                                    "default": "mcp-session"
-                                }
+                            "context": {
+                                "type": "object",
+                                "description": "Context information for auditing (optional)"
+                            }
+                        },
+                        "required": ["response"]
+                    }
+                ),
+                Tool(
+                    name="track_context",
+                    description="Track conversation context and detect information gaps",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "user_input": {
+                                "type": "string",
+                                "description": "User input to analyze for context"
                             },
-                            "required": ["session_id"]
-                        }
-                    )
-                ]
-            )
-        
+                            "session_id": {
+                                "type": "string",
+                                "description": "Session ID for context tracking"
+                            },
+                            "turn_number": {
+                                "type": "integer",
+                                "description": "Turn number in the conversation"
+                            }
+                        },
+                        "required": ["user_input"]
+                    }
+                ),
+                Tool(
+                    name="evaluate_rules",
+                    description="Evaluate logical rules against user input to detect inconsistencies",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "user_input": {
+                                "type": "string",
+                                "description": "User input to evaluate against rules"
+                            },
+                            "session_id": {
+                                "type": "string",
+                                "description": "Session ID for context"
+                            },
+                            "entities": {
+                                "type": "object",
+                                "description": "Extracted entities (optional)"
+                            }
+                        },
+                        "required": ["user_input"]
+                    }
+                ),
+                Tool(
+                    name="get_session_context",
+                    description="Retrieve stored context for a conversation session",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "session_id": {
+                                "type": "string",
+                                "description": "Session ID to retrieve context for"
+                            }
+                        },
+                        "required": ["session_id"]
+                    }
+                )
+            ]
         @self.server.call_tool()
         async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             try:
@@ -195,29 +182,27 @@ class MCPServer:
         """Register MCP resources"""
         
         @self.server.list_resources()
-        async def list_resources() -> ListResourcesResult:
-            return ListResourcesResult(
-                resources=[
-                    Resource(
-                        uri="context://session/current",
-                        name="Current Session Context",
-                        description="Current conversation context and tracked information",
-                        mimeType="application/json"
-                    ),
-                    Resource(
-                        uri="rules://active",
-                        name="Active Rules",
-                        description="Currently active logical rules for evaluation",
-                        mimeType="application/json"
-                    ),
-                    Resource(
-                        uri="metrics://performance",
-                        name="Performance Metrics",
-                        description="System performance and accuracy metrics",
-                        mimeType="application/json"
-                    )
-                ]
-            )
+        async def list_resources() -> List[Resource]:
+            return [
+                Resource(
+                    uri="context://session/current",
+                    name="Current Session Context",
+                    description="Current conversation context and tracked information",
+                    mimeType="application/json"
+                ),
+                Resource(
+                    uri="rules://active",
+                    name="Active Rules",
+                    description="Currently active logical rules for evaluation",
+                    mimeType="application/json"
+                ),
+                Resource(
+                    uri="metrics://performance",
+                    name="Performance Metrics",
+                    description="System performance and accuracy metrics",
+                    mimeType="application/json"
+                )
+            ]
         
         @self.server.read_resource()
         async def read_resource(uri: str) -> ReadResourceResult:
