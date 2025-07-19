@@ -63,6 +63,23 @@ services:
     networks:
       - ai-tracker-network
 
+  # MCP Server for Claude Desktop integration
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    environment:
+      - TRACKER_API_ENDPOINT=http://ai-context-tracker:8080
+      - PYTHONPATH=/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ai-context-tracker
+    networks:
+      - ai-tracker-network
+    stdin_open: true
+    tty: true
+
 volumes:
   postgres_data:
   redis_data:
